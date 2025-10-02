@@ -1,0 +1,44 @@
+﻿<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <style>
+    body { background:#f6f9fc; padding:24px; font-family: Arial, Helvetica, sans-serif; }
+    .card { max-width:640px; margin:auto; background:#fff; border:1px solid #e5e7eb; border-radius:10px; overflow:hidden; }
+    .header { padding:16px 24px; font-weight:600; font-size:18px; background:#111827; color:#fff; }
+    .content { padding:20px 24px; color:#111827; }
+    .meta { width:100%; border-collapse:collapse; margin:10px 0 16px; }
+    .meta td { padding:6px 0; vertical-align:top; }
+    .meta td:first-child { width:120px; color:#6b7280; }
+    .btn { display:inline-block; background:#2563eb; color:#fff !important; text-decoration:none;
+           padding:10px 16px; border-radius:6px; }
+    .muted { color:#6b7280; font-size:12px; margin-top:16px; }
+    a { color:#2563eb; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">New report for property {{ r.propertyId }}</div>
+    <div class="content">
+      <table class="meta">
+        <tr><td>Tenant</td><td>{{ r.tenantId }}</td></tr>
+        <tr><td>Property</td><td>{{ r.propertyId }}</td></tr>
+        <tr><td>Source</td><td>{{ r.sourceChannel }}</td></tr>
+        <tr><td>Created</td><td>{{ r.createdAt }}</td></tr>
+      </table>
+
+      <p><b>Description</b><br/>{{ r.description }}</p>
+
+      {% if r.photoUrl %}
+      <p><b>Photo</b>: <a href="{{ r.photoUrl }}">{{ r.photoUrl }}</a></p>
+      {% endif %}
+
+      <p>
+        <a class="btn" href="http://127.0.0.1:8810/web/api/reports/{{ r.id }}">Open in API</a>
+      </p>
+
+      <p class="muted">This is an automated alert from the Reports API.</p>
+    </div>
+  </div>
+</body>
+</html>

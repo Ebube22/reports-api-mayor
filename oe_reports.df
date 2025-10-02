@@ -1,0 +1,57 @@
+ADD TABLE "oe_reports"
+  AREA "Schema Area"
+  DUMP-NAME "oe_reports".
+
+ADD FIELD "reportId" OF "oe_reports" AS INTEGER
+  MANDATORY
+  POSITION 1
+  ORDER 10.
+
+ADD FIELD "tenantId" OF "oe_reports" AS CHARACTER
+  FORMAT "x(64)"
+  POSITION 2
+  ORDER 20.
+
+ADD FIELD "propertyId" OF "oe_reports" AS CHARACTER
+  FORMAT "x(64)"
+  POSITION 3
+  ORDER 30.
+
+ADD FIELD "description" OF "oe_reports" AS CHARACTER
+  FORMAT "x(4000)"
+  POSITION 4
+  ORDER 40.
+
+ADD FIELD "photoUrl" OF "oe_reports" AS CHARACTER
+  FORMAT "x(1024)"
+  POSITION 5
+  ORDER 50.
+
+ADD FIELD "source" OF "oe_reports" AS CHARACTER
+  FORMAT "x(64)"
+  POSITION 6
+  ORDER 60.
+
+ADD FIELD "createdAtIso" OF "oe_reports" AS CHARACTER
+  FORMAT "x(40)"
+  POSITION 7
+  ORDER 70.
+
+ADD FIELD "severity" OF "oe_reports" AS CHARACTER
+  FORMAT "x(16)"
+  POSITION 8
+  ORDER 80.
+
+ADD FIELD "category" OF "oe_reports" AS CHARACTER
+  FORMAT "x(32)"
+  POSITION 9
+  ORDER 90.
+
+ADD FIELD "tags" OF "oe_reports" AS CHARACTER
+  FORMAT "x(256)"
+  POSITION 10
+  ORDER 100.
+
+ADD INDEX "reportId_u" OF "oe_reports" AREA "Schema Area"
+  UNIQUE
+  INDEX-FIELD "reportId" ASCENDING.

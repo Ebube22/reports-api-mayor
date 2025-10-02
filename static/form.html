@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Submit Report</title>
+<style>
+/* ======================= DARK THEME ======================= */
+:root{
+  --bg-0:#0b1220;           /* page */
+  --bg-1:#0e1629;           /* shell */
+  --card:#0f1b31;           /* cards */
+  --glass:rgba(255,255,255,.06);
+  --line:#1f2a44;
+  --ink:#e5e7eb;
+  --muted:#9aa5b1;
+  --brand:#8b5cf6;          /* violet */
+  --brand-2:#22d3ee;        /* cyan accent */
+  --ok:#10b981;
+  --err:#ef4444;
+  --shadow:0 20px 60px rgba(0,0,0,.45), 0 8px 24px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; color:var(--ink);
+  font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial;
+  background:
+    radial-gradient(1000px 600px at -10% -10%, rgba(34,211,238,.18), transparent 40%),
+    radial-gradient(900px 650px at 110% 10%, rgba(139,92,246,.20), transparent 45%),
+    linear-gradient(180deg, var(--bg-0), var(--bg-1));
+}
+
+/* ======================= LAYOUT ======================= */
+.shell{max-width:1080px;margin:34px auto;padding:0 18px}
+.hero{display:flex;gap:14px;align-items:center;margin-bottom:18px}
+.logo{
+  width:46px;height:46px;border-radius:12px;
+  background:linear-gradient(135deg,var(--brand),var(--brand-2));
+  box-shadow:0 14px 28px rgba(139,92,246,.36);
+  display:grid;place-items:center;color:#fff
+}
+/* inline tenant logo (building) */
+.logo svg{width:28px;height:28px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.4))}
+.hero h1{margin:0;font-size:24px;letter-spacing:.3px}
+.hero .sub{color:var(--muted);font-size:13px}
+
+.card{
+  background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.02));
+  border:1px solid var(--line); border-radius:18px; overflow:hidden;
+  backdrop-filter:saturate(150%) blur(6px); box-shadow:var(--shadow);
+}
+.header{
+  padding:18px 22px;
+  background:linear-gradient(135deg, rgba(139,92,246,.35), rgba(34,211,238,.25));
+  border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between
+}
+.header h2{margin:0;font-size:18px;letter-spacing:.4px}
+.header .pill{
+  background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.22);
+  color:#eaf2ff;border-radius:999px;padding:6px 10px;font-size:12px
+}
+
+.grid{
+  display:grid;gap:22px;padding:22px;
+  grid-template-columns: 1.2fr .9fr;
+}
+@media(max-width:900px){ .grid{grid-template-columns:1fr} }
+
+/* ======================= FORM ======================= */
+.section-title{font-weight:800;margin:6px 0 10px}
+.row{margin:14px 0}
+label{display:block;font-weight:600;color:var(--muted);margin-bottom:8px}
+
+input[type=text],textarea{
+  width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;
+  background:#0b152a; color:var(--ink);
+  outline:none; transition:border-color .15s, box-shadow .15s
+}
+input[type=text]::placeholder, textarea::placeholder{color:#7c8694}
+input[type=text]:focus,textarea:focus{
+  border-color:var(--brand);
+  box-shadow:0 0 0 4px rgba(139,92,246,.25)
+}
+textarea{min-height:120px;resize:vertical}
+.helper{color:var(--muted);font-size:12px;margin-top:6px}
+.inline{display:flex;gap:12px}
+.inline > *{flex:1}
+
+.counter{font-size:12px;color:var(--muted);float:right}
+
+.drop{
+  border:2px dashed var(--line);border-radius:12px;padding:14px;
+  display:grid;grid-template-columns:1fr 140px;gap:12px;align-items:center;
+  background:rgba(255,255,255,.02)
+}
+@media(max-width:520px){.drop{grid-template-columns:1fr}}
+.drop:hover{border-color:rgba(139,92,246,.55)}
+.preview-box{
+  border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#0b152a;
+  display:grid;place-items:center;height:120px
+}
+.preview-box img{max-width:100%;max-height:120px;display:block}
+
+.actions{display:flex;gap:12px;align-items:center;margin-top:6px}
+button{
+  background:linear-gradient(135deg,var(--brand),var(--brand-2));
+  color:#050a18;border:none;border-radius:12px;padding:11px 16px;
+  font-weight:800;cursor:pointer;box-shadow:0 14px 40px rgba(34,211,238,.28)
+}
+button.secondary{
+  background:#0b152a;color:#eaf2ff;border:1px solid var(--line);
+  box-shadow:0 8px 26px rgba(0,0,0,.35)
+}
+button[disabled]{opacity:.6;cursor:not-allowed;box-shadow:none}
+
+.note{display:none;margin-top:12px;border-radius:12px;padding:12px 14px}
+.note.ok{display:block;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.45);color:#a7f3d0}
+.note.err{display:block;background:rgba(239,68,68,.10);border:1px solid rgba(239,68,68,.45);color:#fecaca}
+
+/* ======================= PREVIEW PANEL ======================= */
+.panel{
+  border:1px dashed var(--line);border-radius:12px;padding:16px;
+  background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.02));
+}
+.card-mini{
+  border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0b152a
+}
+.card-mini .img{height:180px;background:#0a1326;display:grid;place-items:center}
+.card-mini .img img{max-width:100%;max-height:180px}
+.card-mini .body{padding:12px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.tag{
+  background:rgba(139,92,246,.15);
+  color:#d7caff;border:1px solid rgba(139,92,246,.35);
+  border-radius:999px;padding:3px 8px;font-size:12px
+}
+
+/* footer */
+.footer{
+  padding:14px 22px;border-top:1px solid var(--line);
+  background:rgba(255,255,255,.02); color:var(--muted);font-size:12px
+}
+.footer a{color:#b8f4ff;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="hero">
+    <div class="logo" title="Tenant">
+      <!-- Building/tenant inline SVG -->
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M4 20h16M7 20V6a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v14M10 9h1M13 9h1M10 12h1M13 12h1M10 15h1M13 15h1"
+              stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M6 20V8a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v12" stroke="white" stroke-opacity=".55" stroke-width="1.2"/>
+      </svg>
+    </div>
+    <div>
+      <h1>Tenant Reports</h1>
+      <div class="sub">Log an issue with a photo and we’ll notify the team instantly.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="header">
+      <h2>New report</h2>
+      <div class="pill">Dark • v1</div>
+    </div>
+
+    <div class="grid">
+      <!-- =================== FORM =================== -->
+      <form id="f" novalidate>
+        <div class="section-title">Details</div>
+
+        <div class="inline">
+          <div class="row">
+            <label for="tenantId">Tenant ID</label>
+            <input id="tenantId" name="tenantId" type="text" required value="T0007" autocomplete="off" />
+          </div>
+          <div class="row">
+            <label for="propertyId">Property ID</label>
+            <input id="propertyId" name="propertyId" type="text" required value="P0123" autocomplete="off" />
+          </div>
+        </div>
+
+        <div class="row">
+          <label for="description">Description <span class="counter" id="cc">0/500</span></label>
+          <textarea id="description" name="description" maxlength="500" required
+            placeholder="Describe the issue…">Black mould around bedroom window; child coughing at night.</textarea>
+          <div class="helper">Be specific: where, severity, when noticed.</div>
+        </div>
+
+        <div class="row">
+          <label for="photoUrl">Photo</label>
+          <div class="drop">
+            <div>
+              <input id="photoUrl" name="photoUrl" type="text" placeholder="https://public-image-url.jpg" />
+              <div class="helper">Paste a public image link, or drag an image here to preview (URL not uploaded).</div>
+            </div>
+            <div class="preview-box"><img id="previewImg" alt="Preview" /></div>
+          </div>
+        </div>
+
+        <div class="row">
+          <label for="sourceChannel">Source</label>
+          <input id="sourceChannel" name="sourceChannel" type="text" value="web" />
+        </div>
+
+        <div class="actions">
+          <button id="submitBtn" type="submit">Submit report</button>
+          <button id="resetBtn" class="secondary" type="button">Reset</button>
+        </div>
+
+        <div id="ok"  class="note ok"></div>
+        <div id="err" class="note err"></div>
+      </form>
+
+      <!-- =================== LIVE PREVIEW =================== -->
+      <div class="panel">
+        <div class="section-title">Live preview</div>
+        <div class="card-mini">
+          <div class="img"><img id="pImg" alt=""/></div>
+          <div class="body">
+            <div class="tags">
+              <span class="tag" id="pTenant">T0007</span>
+              <span class="tag" id="pProp">P0123</span>
+              <span class="tag" id="pSource">web</span>
+            </div>
+            <div id="pDesc">Black mould around bedroom window; child coughing at night.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      Powered by <a href="/docs" target="_blank">Reports API</a>. Problems? <a href="mailto:support@example.test">Contact support</a>.
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const qs = s => document.querySelector(s);
+  const f  = qs('#f');
+  const ok = qs('#ok'), err=qs('#err');
+  const btn= qs('#submitBtn'), reset=qs('#resetBtn');
+
+  const t=qs('#tenantId'), p=qs('#propertyId'),
+        d=qs('#description'), u=qs('#photoUrl'), s=qs('#sourceChannel');
+
+  const cc=qs('#cc');
+  const pImg=qs('#pImg'), pTenant=qs('#pTenant'), pProp=qs('#pProp'), pSource=qs('#pSource'), pDesc=qs('#pDesc');
+  const previewImg=qs('#previewImg');
+
+  function uc(e){ e.target.value = e.target.value.toUpperCase(); sync(); }
+  t.addEventListener('input', uc); p.addEventListener('input', uc);
+
+  function count(){ cc.textContent = `${d.value.length}/500`; sync(); }
+  d.addEventListener('input', count); count();
+
+  function setPreview(src){
+    if(src){ previewImg.src = src; pImg.src = src; }
+    else{ previewImg.removeAttribute('src'); pImg.removeAttribute('src'); }
+  }
+  function sync(){
+    pTenant.textContent = t.value || '—';
+    pProp.textContent   = p.value || '—';
+    pSource.textContent = s.value || '—';
+    pDesc.textContent   = d.value || '—';
+    const val = (u.value||'').trim();
+    setPreview(/^https?:\/\//i.test(val) ? val : '');
+  }
+  ['input','change'].forEach(ev => { u.addEventListener(ev, sync); s.addEventListener(ev, sync); });
+  sync();
+
+  // drag & drop preview (not uploaded)
+  const drop = document.querySelector('.drop');
+  ['dragenter','dragover'].forEach(e=>drop.addEventListener(e, ev=>{ev.preventDefault();drop.style.borderColor='rgba(139,92,246,.6)'}));
+  ;['dragleave','drop'].forEach(e=>drop.addEventListener(e, ev=>{ev.preventDefault();drop.style.borderColor='var(--line)'}));
+  drop.addEventListener('drop', ev=>{
+    const file = ev.dataTransfer.files?.[0];
+    if(file && file.type.startsWith('image/')){
+      const url = URL.createObjectURL(file);
+      setPreview(url);
+    }
+  });
+
+  // Prefill from query / localStorage
+  const params = new URLSearchParams(location.search);
+  if(params.get('tenantId')) t.value=params.get('tenantId');
+  if(params.get('propertyId')) p.value=params.get('propertyId');
+  if(params.get('source')) s.value=params.get('source');
+  try{
+    const last = JSON.parse(localStorage.getItem('reportFormLast')||'{}');
+    if(!params.size){ t.value=last.tenantId||t.value; p.value=last.propertyId||p.value; s.value=last.sourceChannel||s.value; }
+  }catch{}
+  sync();
+
+  reset.addEventListener('click', ()=>{ f.reset(); count(); sync(); ok.style.display='none'; err.style.display='none'; });
+
+  f.addEventListener('submit', async (e)=>{
+    e.preventDefault(); ok.style.display='none'; err.style.display='none';
+    if(!f.checkValidity()){ err.textContent='Please fill all required fields.'; err.className='note err'; err.style.display='block'; return; }
+
+    btn.disabled=true;
+    const body = {
+      tenantId: t.value.trim(),
+      propertyId: p.value.trim(),
+      description: d.value.trim(),
+      photoUrl: (u.value.trim() || null),
+      sourceChannel: (s.value.trim() || 'web'),
+    };
+
+    try{
+      const res = await fetch('/web/api/reports', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+      if(!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+      const data = await res.json();
+
+      localStorage.setItem('reportFormLast', JSON.stringify({tenantId:body.tenantId, propertyId:body.propertyId, sourceChannel:body.sourceChannel}));
+
+      ok.textContent = `✔ Report ${data.id} saved. Open /web/api/reports/${data.id}`;
+      ok.className = 'note ok'; ok.style.display='block';
+    }catch(ex){
+      err.textContent = `✖ ${ex.message}`;
+      err.className = 'note err'; err.style.display='block';
+    }finally{
+      btn.disabled=false;
+    }
+  });
+})();
+</script>
+</body>
+</html>
