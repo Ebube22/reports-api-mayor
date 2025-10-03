@@ -1,4 +1,4 @@
-# ================== Build and Push README.md (all-in-one) ==================
+
 # Folder
 cd C:\reports-api
 
@@ -101,7 +101,7 @@ Install Python 3.11 or later, then:
 cd C:\reports-api
 pip install fastapi uvicorn aiosqlite aiosmtplib python-dotenv
 
-2) .env configuration
+### 2) .env configuration
 
 Create C:\reports-api.env with SMTP settings. Mailtrap Sandbox example:
 
@@ -115,10 +115,10 @@ MAIL_TO=repairs-team@example.test
 # Optional custom DB file path
 # REPORTS_DB=C:\reports-api\data\reports.db
 
-3. Run the API
+### 3. Run the API
 py -3 -m uvicorn app:app --host 127.0.0.1 --port 8812 --reload
 
-4.Quick tests
+### 4.Quick tests
 # Ping
 & "$env:SystemRoot\System32\curl.exe" --noproxy "*" -i "http://127.0.0.1:8812/web/ping"
 
@@ -142,7 +142,7 @@ $req="$env:TEMP\req.json"
 # Daily digest (24h)
 & "$env:SystemRoot\System32\curl.exe" --noproxy "*" -i "http://127.0.0.1:8812/web/admin/send-digest?hours=24"
 
-5.Schedule Digest(Optional)
+### 5.Schedule Digest(Optional)
 $job = 'C:\reports-api\jobs'
 New-Item -ItemType Directory -Force $job | Out-Null
 @'
