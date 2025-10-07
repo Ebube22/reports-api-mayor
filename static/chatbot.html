@@ -1,0 +1,240 @@
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
+diff --git a//dev/null b/static/chatbot.html
+index 0000000000000000000000000000000000000000..d94e0ae6be2e107802289d69ca727e06de370531 100644
+--- a//dev/null
++++ b/static/chatbot.html
+@@ -0,0 +1,231 @@
++<!doctype html>
++<html lang="en">
++  <head>
++    <meta charset="utf-8">
++    <title>Tenant Support Chatbot</title>
++    <meta name="viewport" content="width=device-width, initial-scale=1">
++    <style>
++      :root {
++        color-scheme: dark;
++        --bg: #0b0f14;
++        --card: #111827;
++        --accent: #2563eb;
++        --text: #e5e7eb;
++        --muted: #9ca3af;
++      }
++      body {
++        margin: 0;
++        font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
++        background: var(--bg);
++        color: var(--text);
++        display: flex;
++        min-height: 100vh;
++        align-items: center;
++        justify-content: center;
++        padding: 24px;
++      }
++      .chat-card {
++        background: var(--card);
++        border: 1px solid #1f2937;
++        border-radius: 16px;
++        width: min(720px, 100%);
++        display: flex;
++        flex-direction: column;
++        overflow: hidden;
++        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
++      }
++      header {
++        padding: 20px 24px;
++        border-bottom: 1px solid #1f2937;
++        display: flex;
++        justify-content: space-between;
++        align-items: center;
++      }
++      header h1 {
++        font-size: 20px;
++        margin: 0;
++      }
++      header span {
++        font-size: 13px;
++        color: var(--muted);
++      }
++      .messages {
++        padding: 24px;
++        display: grid;
++        gap: 16px;
++        flex: 1;
++        overflow-y: auto;
++      }
++      .message {
++        display: grid;
++        gap: 6px;
++      }
++      .message.agent {
++        justify-items: start;
++      }
++      .message.user {
++        justify-items: end;
++      }
++      .bubble {
++        padding: 12px 16px;
++        border-radius: 14px;
++        max-width: 520px;
++        line-height: 1.5;
++      }
++      .bubble.agent {
++        background: rgba(37, 99, 235, 0.18);
++        border: 1px solid rgba(59, 130, 246, 0.35);
++      }
++      .bubble.user {
++        background: rgba(148, 163, 184, 0.18);
++        border: 1px solid rgba(148, 163, 184, 0.35);
++      }
++      .actions {
++        display: flex;
++        flex-wrap: wrap;
++        gap: 8px;
++        font-size: 13px;
++        color: var(--muted);
++      }
++      .actions span {
++        background: rgba(148, 163, 184, 0.12);
++        border: 1px solid rgba(148, 163, 184, 0.18);
++        border-radius: 999px;
++        padding: 4px 10px;
++      }
++      form {
++        border-top: 1px solid #1f2937;
++        padding: 16px 20px;
++        display: flex;
++        gap: 12px;
++        background: rgba(11, 15, 20, 0.85);
++      }
++      textarea {
++        resize: none;
++        flex: 1;
++        min-height: 48px;
++        max-height: 140px;
++        padding: 12px 14px;
++        border-radius: 12px;
++        border: 1px solid #1f2937;
++        background: rgba(17, 24, 39, 0.85);
++        color: var(--text);
++        font-size: 15px;
++      }
++      textarea:focus {
++        outline: 2px solid rgba(37, 99, 235, 0.5);
++        outline-offset: 2px;
++      }
++      button {
++        background: var(--accent);
++        border: none;
++        color: white;
++        border-radius: 12px;
++        padding: 12px 18px;
++        font-weight: 600;
++        cursor: pointer;
++        display: inline-flex;
++        align-items: center;
++        gap: 8px;
++      }
++      button[disabled] {
++        opacity: 0.6;
++        cursor: not-allowed;
++      }
++      .status {
++        font-size: 13px;
++        color: var(--muted);
++        text-align: center;
++        padding: 8px 0 16px;
++      }
++    </style>
++  </head>
++  <body>
++    <div class="chat-card">
++      <header>
++        <div>
++          <h1>Repairs helper</h1>
++          <span>Tell us what is happening in your home</span>
++        </div>
++        <span id="severity-tag">Ready</span>
++      </header>
++      <div class="messages" id="messages" role="log" aria-live="polite"></div>
++      <div class="status" id="status" hidden>Thinking...</div>
++      <form id="chat-form">
++        <textarea id="message-input" placeholder="Describe the problem..." required></textarea>
++        <button type="submit" id="send-btn">Send</button>
++      </form>
++    </div>
++    <script>
++      const form = document.getElementById('chat-form');
++      const input = document.getElementById('message-input');
++      const messages = document.getElementById('messages');
++      const status = document.getElementById('status');
++      const severityTag = document.getElementById('severity-tag');
++      const sendBtn = document.getElementById('send-btn');
++
++      function addMessage(text, role, actions = []) {
++        const wrapper = document.createElement('div');
++        wrapper.className = `message ${role}`;
++
++        const bubble = document.createElement('div');
++        bubble.className = `bubble ${role}`;
++        bubble.textContent = text;
++        wrapper.appendChild(bubble);
++
++        if (role === 'agent' && actions.length) {
++          const actionWrap = document.createElement('div');
++          actionWrap.className = 'actions';
++          actions.forEach(action => {
++            const badge = document.createElement('span');
++            badge.textContent = action;
++            actionWrap.appendChild(badge);
++          });
++          wrapper.appendChild(actionWrap);
++        }
++
++        messages.appendChild(wrapper);
++        messages.scrollTop = messages.scrollHeight;
++      }
++
++      function setStatus(isLoading) {
++        status.hidden = !isLoading;
++        sendBtn.disabled = isLoading;
++      }
++
++      addMessage('Hello! I\'m here to help with any repair issues in your home. How can I assist you today?', 'agent');
++
++      form.addEventListener('submit', async (event) => {
++        event.preventDefault();
++        const text = input.value.trim();
++        if (!text) return;
++
++        addMessage(text, 'user');
++        input.value = '';
++        setStatus(true);
++
++        try {
++          const response = await fetch('/web/api/chatbot', {
++            method: 'POST',
++            headers: { 'Content-Type': 'application/json' },
++            body: JSON.stringify({ message: text })
++          });
++
++          if (!response.ok) {
++            throw new Error('Request failed');
++          }
++
++          const data = await response.json();
++          addMessage(data.reply, 'agent', data.suggestedActions || []);
++          severityTag.textContent = `${data.severity} • ${data.category}`;
++        } catch (error) {
++          console.error(error);
++          addMessage('Sorry, something went wrong while getting help. Please try again in a moment or contact the repairs team directly.', 'agent');
++        } finally {
++          setStatus(false);
++          input.focus();
++        }
++      });
++    </script>
++  </body>
++</html>
+ 
+EOF
+)
